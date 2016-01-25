@@ -312,11 +312,11 @@ reconnect:
         pthread_mutex_unlock(&transaction.transactionCompleteMutex);
 
         err = transaction.responseReceiverErr;
-
-        pthread_mutex_lock(&connection->mutex);
-        RemoveElementType(&transaction, &connection->outstandingTransactions, SMFPTransaction, element);
-        pthread_mutex_unlock(&connection->mutex);
     }
+
+    pthread_mutex_lock(&connection->mutex);
+    RemoveElementType(&transaction, &connection->outstandingTransactions, SMFPTransaction, element);
+    pthread_mutex_unlock(&connection->mutex);
 
     return err;
 }
