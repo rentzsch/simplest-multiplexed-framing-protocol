@@ -57,7 +57,7 @@ static void perrorf(const char * __restrict format, ...) {
     perror(message);
 }
 
-#define trace_errno(MSG) perrorf(MSG " errno:%d " __FILE__ ":%d", errno, __LINE__);
+#define trace_errno(MSG) perrorf(MSG " errno:%d " __FILE__ ":%d", errno, __LINE__)
 
 static const char* CStringCopy(const char* cstr) {
     size_t len = strlen(cstr) + 1;
@@ -73,7 +73,7 @@ SMFPConnectionRef SMFPConnectionCreate(const char *socketPath, SMFPErr *errp) {
     SMFPConnectionRef connection = (SMFPConnectionRef)malloc(sizeof(SMFPConnection));
     connection->state = SMFPConnectionState_Closed;
     connection->socketPath = CStringCopy(socketPath);
-    connection->transactionID = 0;
+    connection->transactionID = 1;
     pthread_mutex_init(&connection->mutex, NULL);
     NewElementList(&connection->outstandingTransactions);
 
@@ -90,6 +90,22 @@ SMFPConnectionRef SMFPConnectionCreate(const char *socketPath, SMFPErr *errp) {
 
     if (errp) *errp = err;
     return connection;
+}
+
+SMFPErr SMFPConnectionSwitchSocket(SMFPConnectionRef connection, const char *socketPath) {
+    assert(connection);
+    assert(socketPath);
+    assert(strlen(socketPath));
+
+    pthread_mutex_lock(&connection->mutex);
+    shutdown(connection->socketFD, SHUT_RDWR);
+    close(connection->socketFD);
+    connection->state = SMFPConnectionState_Closed;
+    free((void*)connection->socketPath);
+    connection->socketPath = CStringCopy(socketPath);
+    pthread_mutex_unlock(&connection->mutex);
+
+    return SMFPErr_NoErr;
 }
 
 void SMFPConnectionDispose(SMFPConnectionRef connection) {
@@ -117,15 +133,16 @@ SMFPErr _SMFPReadConnection(SMFPConnectionRef connection, void *buf, size_t nbyt
     return SMFPErr_NoErr;
 }
 
-void* _SMFPReaderThread(SMFPTransaction *transaction)
+void* _SMFPReaderThread(SMFPConnectionRef connection)
 {
+    puts("entering _SMFPReaderThread");
+
     typedef struct {
         int32_t   length;
         uint32_t  transactionID;
     } SMFPResponseHeader;
 
     SMFPErr err = SMFPErr_NoErr;
-    SMFPConnectionRef connection = transaction->connection;
 
     while (!err) {
         SMFPResponseHeader responseHeader;
@@ -175,6 +192,7 @@ void* _SMFPReaderThread(SMFPTransaction *transaction)
         }
     }
 
+    puts("exiting _SMFPReaderThread");
     return NULL;
 }
 
@@ -232,7 +250,7 @@ reconnect:
             while (!err && connection->state == SMFPConnectionState_Opening && retries--) {
                 if (connect(connection->socketFD, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
                     if (ECONNREFUSED == errno || ENOENT == errno) {
-                        printf("SMFP: ENOENT||ECONNREFUSED, sleep(1) until retrying connect() (retries left: %d)\n", retries);
+                        printf("SMFP: ENOENT||ECONNREFUSED, sleep(1) until retrying connect() (retries left: %d, oath: %s)\n", retries, connection->socketPath);
                         sleep(1);
                     } else {
                         trace_errno("connect()");
@@ -248,7 +266,7 @@ reconnect:
             if (err) {
                 connection->state = SMFPConnectionState_Closed;
             } else {
-                err = errno = pthread_create(&connection->responseReaderThread, NULL, (pthread_start_proc)_SMFPReaderThread, &transaction);
+                err = errno = pthread_create(&connection->responseReaderThread, NULL, (pthread_start_proc)_SMFPReaderThread, transaction.connection);
                 if (err) {
                     trace_errno("pthread_create");
                 }
@@ -274,7 +292,9 @@ reconnect:
         ssize_t writeResult = writev(connection->socketFD, iov, 4);
         if (writeResult < 0) {
             if (EPIPE == errno) {
+                pthread_mutex_lock(&connection->mutex);
                 connection->state = SMFPConnectionState_Closed;
+                pthread_mutex_unlock(&connection->mutex);
                 goto reconnect;
             } else {
                 trace_errno("writev()");

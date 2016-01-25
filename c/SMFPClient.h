@@ -9,15 +9,15 @@
 typedef enum {
     SMFPErr_NoErr                      = 0,
     SMFPErr_BeginNumberspace           = -100,
-    
+
     SMFPErr_Local_BeginNumberspace     = -100,
     SMFPErr_Local_ConnectionFailed     = -100,
     SMFPErr_Local_EndNumberspace       = -199,
-    
+
     SMFPErr_Remote_BeginNumberspace    = -200,
     SMFPErr_Remote_UnknownRequestCode  = -200,
     SMFPErr_Remote_EndNumberspace      = -299,
-    
+
     SMFPErr_EndNumberspace             = -299,
 } SMFPErr;
 
@@ -28,6 +28,8 @@ typedef enum {
 typedef struct SMFPConnection* SMFPConnectionRef;
 
 SMFPConnectionRef SMFPConnectionCreate(const char *socketPath, SMFPErr *err);
+
+SMFPErr SMFPConnectionSwitchSocket(SMFPConnectionRef connection, const char *socketPath);
 
 void SMFPConnectionDispose(SMFPConnectionRef connection);
 
