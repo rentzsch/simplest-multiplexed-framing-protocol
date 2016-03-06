@@ -361,6 +361,10 @@ SMFPErr SMFPRead(int fd, void *buf, size_t nbytes)
 
 //-----------------------------------------------------------------------------------------
 
+int IsSMFPErr(int err) {
+    return err <= SMFPErr_BeginNumberspace && err >= SMFPErr_EndNumberspace;
+}
+
 const char* SMFPErrToStr(SMFPErr err) {
     switch (err) {
         case SMFPErr_NoErr:

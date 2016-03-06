@@ -66,6 +66,7 @@ SMFPErr SMFPRead(int fd, void *buf, size_t nbytes);
 // Error.
 //
 
+int IsSMFPErr(int err);
 const char* SMFPErrToStr(SMFPErr err);
 
 #endif /* SMFPClient_h */
