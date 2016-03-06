@@ -192,6 +192,25 @@ void* _SMFPReaderThread(SMFPConnectionRef connection)
         }
     }
 
+    printf("_SMFPReaderThread: _SMFPReadConnection failed with %s\n", SMFPErrToStr(err));
+
+    pthread_mutex_lock(&connection->mutex);
+    SMFPTransaction *transactionItr;
+    for (
+        transactionItr = (SMFPTransaction*)connection->outstandingTransactions.first;
+        transactionItr;
+        transactionItr = (SMFPTransaction*)transactionItr->element.next
+    ){
+        printf("_SMFPReaderThread: canceling transaction %p\n", transactionItr);
+
+        transactionItr->responseReceiverErr = SMFPErr_Local_ConnectionFailed;
+
+        pthread_mutex_lock(&transactionItr->transactionCompleteMutex);
+        pthread_cond_signal(&transactionItr->transactionCompleteCond);
+        pthread_mutex_unlock(&transactionItr->transactionCompleteMutex);
+    }
+    pthread_mutex_unlock(&connection->mutex);
+
     puts("exiting _SMFPReaderThread");
     return NULL;
 }
