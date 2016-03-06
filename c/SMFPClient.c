@@ -250,7 +250,7 @@ reconnect:
             while (!err && connection->state == SMFPConnectionState_Opening && retries--) {
                 if (connect(connection->socketFD, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
                     if (ECONNREFUSED == errno || ENOENT == errno) {
-                        printf("SMFP: ENOENT||ECONNREFUSED, sleep(1) until retrying connect() (retries left: %d, oath: %s)\n", retries, connection->socketPath);
+                        printf("SMFP: ENOENT||ECONNREFUSED, sleep(1) until retrying connect() (retries left: %d, path: %s)\n", retries, connection->socketPath);
                         sleep(1);
                     } else {
                         trace_errno("connect()");
