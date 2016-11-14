@@ -1,7 +1,5 @@
-var assert = require('assert');
-
-require('babel/register')({ optional: ['es7.asyncFunctions'] });
-var parseSMFPRequest = require('../parse-smfp-request.babel');
+const assert = require('assert');
+const parseSMFPRequest = require('../parse-smfp-request.js');
 
 describe('parseSMFPRequest', function(){
     it('empty buffer', function(){
