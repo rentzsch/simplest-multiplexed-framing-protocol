@@ -150,6 +150,7 @@ void* _SMFPReaderThread(SMFPConnectionRef connection)
         if (!err) {
             responseHeader.length = ntohl(responseHeader.length);
             responseHeader.transactionID = ntohl(responseHeader.transactionID);
+            //printf("RECEIVED transactionID %d\n", responseHeader.transactionID);
 
             pthread_mutex_lock(&connection->mutex);
             SMFPTransaction *transaction = NULL, *transactionItr = (SMFPTransaction*)connection->outstandingTransactions.first;
@@ -185,9 +186,7 @@ void* _SMFPReaderThread(SMFPConnectionRef connection)
                     pthread_mutex_unlock(&transaction->transactionCompleteMutex);
                 }
             } else {
-                printf("SMFP: couldn't find outstanding transaction for %d\n", responseHeader.transactionID);
-                exit(EXIT_FAILURE);
-                // TODO: better error handling+reporting.
+                printf("SMFP: WARN couldn't find outstanding transactionID %d. Server probably responded to the same transaction twice, which is a protocol error. Ignoring.\n", responseHeader.transactionID);
             }
         }
     }
@@ -319,6 +318,8 @@ reconnect:
                 trace_errno("writev()");
                 exit(EXIT_FAILURE);
             }
+        } else {
+            //printf("SENT transactionID %d\n", transaction.transactionID);
         }
     }
 
@@ -333,6 +334,7 @@ reconnect:
         err = transaction.responseReceiverErr;
     }
 
+    //printf("REMOVING transactionID %d\n", transaction.transactionID);
     pthread_mutex_lock(&connection->mutex);
     RemoveElementType(&transaction, &connection->outstandingTransactions, SMFPTransaction, element);
     pthread_mutex_unlock(&connection->mutex);
