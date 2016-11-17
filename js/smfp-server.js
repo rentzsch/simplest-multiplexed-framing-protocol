@@ -115,6 +115,7 @@ class SMFPTransaction {
         this.requestCode = requestCode;
         this.transactionID = transactionID;
         this.requestArg = requestArg;
+        this.markedCompleted = false;
     }
 
     // Response format:
@@ -123,6 +124,11 @@ class SMFPTransaction {
     // u8[]?  resData
 
     respond(responseData, transactionCompleted) {
+        if (transactionCompleted && this.markedCompleted) {
+            console.warn('WARN transaction marked completed more than once')
+        }
+        this.markedCompleted = transactionCompleted;
+
         let resBuf = new Buffer(8);
         resBuf.writeInt32BE(responseData.length, 0);
         resBuf.writeUInt32BE(this.transactionID, 4);
@@ -135,6 +141,11 @@ class SMFPTransaction {
     }
 
     respondErr(negativeErrCode) {
+        if (this.markedCompleted) {
+            console.warn('WARN transaction marked completed more than once')
+        }
+        this.markedCompleted = true;
+
         let resBuf = new Buffer(8);
         resBuf.writeInt32BE(negativeErrCode, 0);
         resBuf.writeUInt32BE(this.transactionID, 4);
