@@ -7,7 +7,7 @@
 // transactionID                           5       4       u32   9
 // argument data                           9       n       u8[]
 
-const assert = require('assert');
+'use strict';
 
 function parseSMFPRequest(reqBuffer) {
     const kLengthFieldLength = 4;
@@ -23,7 +23,7 @@ function parseSMFPRequest(reqBuffer) {
         if (clientMessageLength < 5 || clientMessageLength > 10*1024*1024) {
             return {
                 err: 'invalid message length '+clientMessageLength,
-            }
+            };
         }
         if (reqBuffer.length >= kLengthFieldLength + clientMessageLength) {
             // Request complete.

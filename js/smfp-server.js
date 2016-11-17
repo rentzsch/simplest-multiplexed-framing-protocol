@@ -1,3 +1,5 @@
+'use strict';
+
 const net = require('net');
 const fs = require('fs');
 
@@ -10,7 +12,7 @@ class SMFPServer {
         this.netServer = net.createServer(this.handleNetConnection.bind(this));
         this.connectionIDCounter = 0;
 
-        try { fs.unlinkSync(unixSocketPath); } catch(ex){};
+        try { fs.unlinkSync(unixSocketPath); } catch(ex){global;}
         this.netServer.listen(unixSocketPath);
         console.log('smfp server listening on '+unixSocketPath);
     }
@@ -125,7 +127,7 @@ class SMFPTransaction {
 
     respond(responseData, transactionCompleted) {
         if (transactionCompleted && this.markedCompleted) {
-            console.warn('WARN transaction marked completed more than once')
+            console.warn('WARN transaction marked completed more than once');
         }
         this.markedCompleted = transactionCompleted;
 
@@ -142,7 +144,7 @@ class SMFPTransaction {
 
     respondErr(negativeErrCode) {
         if (this.markedCompleted) {
-            console.warn('WARN transaction marked completed more than once')
+            console.warn('WARN transaction marked completed more than once');
         }
         this.markedCompleted = true;
 
