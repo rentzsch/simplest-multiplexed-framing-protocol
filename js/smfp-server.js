@@ -17,7 +17,7 @@ class SMFPServer {
         console.log('smfp server listening on '+unixSocketPath);
     }
     handleNetConnection(netConnection) {
-        let connectionID = this.connectionIDCounter++;
+        const connectionID = this.connectionIDCounter++;
         console.log('smfp client '+connectionID+' connected');
         new SMFPConnection(this, connectionID, netConnection);
     }
@@ -54,7 +54,7 @@ class SMFPConnection {
 
     processReqBuffer() {
         while (this.reqBuffer.length) {
-            let smfpRequest = parseSMFPRequest(this.reqBuffer);
+            const smfpRequest = parseSMFPRequest(this.reqBuffer);
             if (smfpRequest.err === null) {
                 //console.log('    transactionID', smfpRequest.transactionID);
                 this.processRequest(smfpRequest);
@@ -69,11 +69,11 @@ class SMFPConnection {
     }
     processRequest(req) {
         // Remove this request's bytes from the request buffer.
-        let smallerReqBuffer = new Buffer(this.reqBuffer.length - req.totalLength);
+        const smallerReqBuffer = new Buffer(this.reqBuffer.length - req.totalLength);
         this.reqBuffer.copy(smallerReqBuffer, 0, req.totalLength);
         this.reqBuffer = smallerReqBuffer;
 
-        let transaction = new SMFPTransaction(
+        const transaction = new SMFPTransaction(
             this,
             req.code,
             req.transactionID,
@@ -131,10 +131,10 @@ class SMFPTransaction {
         }
         this.markedCompleted = transactionCompleted;
 
-        let resBuf = new Buffer(8);
-        resBuf.writeInt32BE(responseData.length, 0);
-        resBuf.writeUInt32BE(this.transactionID, 4);
-        resBuf = Buffer.concat([resBuf, responseData]);
+        const resHeadBuf = new Buffer(8);
+        resHeadBuf.writeInt32BE(responseData.length, 0);
+        resHeadBuf.writeUInt32BE(this.transactionID, 4);
+        const resBuf = Buffer.concat([resHeadBuf, responseData]);
         this.connection.write(this, resBuf, transactionCompleted);
     }
 
@@ -148,7 +148,7 @@ class SMFPTransaction {
         }
         this.markedCompleted = true;
 
-        let resBuf = new Buffer(8);
+        const resBuf = new Buffer(8);
         resBuf.writeInt32BE(negativeErrCode, 0);
         resBuf.writeUInt32BE(this.transactionID, 4);
         this.connection.write(this, resBuf, true);

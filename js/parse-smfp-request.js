@@ -19,7 +19,7 @@ function parseSMFPRequest(reqBuffer) {
 
     let result = { err: 'incomplete' };
     if (reqBuffer.length >= kRequestHeaderLength) {
-        let clientMessageLength = reqBuffer.readUInt32BE(0);
+        const clientMessageLength = reqBuffer.readUInt32BE(0);
         if (clientMessageLength < 5 || clientMessageLength > 10*1024*1024) {
             return {
                 err: 'invalid message length '+clientMessageLength,
@@ -27,7 +27,7 @@ function parseSMFPRequest(reqBuffer) {
         }
         if (reqBuffer.length >= kLengthFieldLength + clientMessageLength) {
             // Request complete.
-            let requestArg = new Buffer(
+            const requestArg = new Buffer(
                 clientMessageLength -
                 kRequestCodeFieldLength -
                 kTransactionFieldLength
