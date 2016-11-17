@@ -29,7 +29,7 @@ class SMFPConnection {
         this.server = server;
         this.connectionID = connectionID;
         this.netConnection = netConnection;
-        this.transactionsByIDs = {};
+        this.transactionsByIDs = Object.create(null);
         this.reqBuffer = new Buffer(0);
 
         netConnection.on('data', this.netConnectionOnData.bind(this));
@@ -87,18 +87,18 @@ class SMFPConnection {
             //console.log('    writing', resBuf);
             this.netConnection.write(resBuf);
             if (completedTransaction) {
-                this.completedTransaction(transaction);
+                this._completeTransaction(transaction);
             }
         } catch (ex) {
             if (ex.code === 'EPIPE') {
                 // Client crashed.
-                this.completedTransaction(transaction);
+                this._completeTransaction(transaction);
             } else {
                 throw ex;
             }
         }
     }
-    completedTransaction(transaction) {
+    _completeTransaction(transaction) {
         delete this.transactionsByIDs[transaction.transactionID];
         //console.log('    transaction '+transaction.transactionID+' completed');
     }
