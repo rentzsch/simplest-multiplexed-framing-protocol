@@ -12,10 +12,11 @@ static SMFPResponseReceiverResult Uppercase_ResponseReceiver(SMFPErr err, int so
         .err = err,
     };
 
-    result.err = SMFPRead(socketFD, output, responseSize);
+    if (!result.err) {
+        result.err = SMFPRead(socketFD, output, responseSize);
+    }
 
     sResponseReceived = true;
-
     return result;
 }
 
