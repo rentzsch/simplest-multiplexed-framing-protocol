@@ -1,13 +1,16 @@
-// Simplest Multiplexed Framing Protocol Request Format:
-//
+// parse-smfp-request.js semver:1.3.0
+//   Copyright (c) 2015-2016 Jonathan 'Wolf' Rentzsch: http://rentzsch.com
+//   Some rights reserved: http://opensource.org/licenses/mit
+//   https://github.com/rentzsch/simplest-multiplexed-framing-protocol
+
+'use strict';
+
 // Field                                   Offset  Length  Type  End
 // -----                                   ------  ------  ----  ---
 // subsequent message length (at least 5)  0       4       u32   4
 // request code                            4       1       u8    5
 // transactionID                           5       4       u32   9
 // argument data                           9       n       u8[]
-
-'use strict';
 
 function parseSMFPRequest(reqBuffer) {
     const kLengthFieldLength = 4;

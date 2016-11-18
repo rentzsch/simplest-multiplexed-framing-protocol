@@ -1,31 +1,19 @@
 {
   "name": "simplest-multiplexed-framing-protocol",
-  "version": "0.1.0",
+  "version": "1.3.0",
   "description": "simple binary protocol for concurrent async unix sockets",
-  "main": "example/example-server.js",
-  "directories": {
-    "test": "test"
+  "homepage": "https://github.com/rentzsch/simplest-multiplexed-framing-protocol#readme",
+  "license": "MIT",
+  "devDependencies": {
+    "mocha": "^3.1.2"
   },
   "scripts": {
     "test": "./node_modules/mocha/bin/mocha"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/rentzsch/simplest-multiplexed-framing-protocol.git"
   },
   "keywords": [
     "unix",
     "socket",
     "binary",
     "protocol"
-  ],
-  "author": "Jonathan 'Wolf' Rentzsch",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/rentzsch/simplest-multiplexed-framing-protocol/issues"
-  },
-  "homepage": "https://github.com/rentzsch/simplest-multiplexed-framing-protocol#readme",
-  "devDependencies": {
-    "mocha": "^3.1.2"
-  }
+  ]
 }

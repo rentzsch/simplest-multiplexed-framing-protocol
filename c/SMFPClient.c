@@ -1,3 +1,8 @@
+// SMFPClient.c semver:1.3.0
+//   Copyright (c) 2015-2016 Jonathan 'Wolf' Rentzsch: http://rentzsch.com
+//   Some rights reserved: http://opensource.org/licenses/mit
+//   https://github.com/rentzsch/simplest-multiplexed-framing-protocol
+
 #include <assert.h>
 #include <errno.h>
 #include <limits.h>
